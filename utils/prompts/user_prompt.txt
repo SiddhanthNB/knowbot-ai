@@ -1,0 +1,7 @@
+context:
+{context}
+
+question:
+{question}
+
+Please provide the answer.
