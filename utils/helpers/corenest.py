@@ -1,25 +1,19 @@
-import json
 import requests
 import utils.constants as constants
 
 def _build_headers():
-    auth = {
-        'client-name': constants.CLIENT_NAME,
-        'client-id': constants.CLIENT_ID,
-        'client-secret': constants.CLIENT_SECRET
-    }
-    return { 'auth': json.dumps(auth) }
+    return  { 'Authorization': f"Bearer {constants.CORENEST_SECRET_KEY}" }
 
-def _dispatch_request(url, params={}, headers={}, method='get'):
-    method = method.upper()
+def _dispatch_request(url='', method='get', params={}, headers={}):
+    if url.strip() == '':
+        raise ValueError("URL cannot be empty")
 
-    if method == 'GET':
-        response = requests.get(url, json=params, headers=headers)
-    elif method == 'POST':
-        response = requests.post(url, json=params, headers=headers)
-    else:
+    method = method.lower()
+
+    if method not in ['get', 'post']:
         raise ValueError(f"Unsupported HTTP method: {method}")
 
+    response = requests.__dict__[method](url, json=params, headers=headers)
     response.raise_for_status()
     return response.json()
 
@@ -29,16 +23,13 @@ def perform_ping():
     return response == 'pong'
 
 def fetch_embeddings(text):
-    url = f'{constants.CORENEST_API_URL}/embed'
-
-    params = { 'texts': [ text ] }
-
-    response = _dispatch_request(url, params, _build_headers())
-
-    return response['result'][0]
+    url = f'{constants.CORENEST_API_URL}/embeddings'
+    params = {'provider': 'google', 'texts': [ text ]}
+    response = _dispatch_request(url, 'post', params, _build_headers())
+    return response['result']['content'][0]
 
 def fetch_llm_response(question, context):
-    url = f'{constants.CORENEST_API_URL}/generate'
+    url = f'{constants.CORENEST_API_URL}/completions'
 
     with open('utils/prompts/system_prompt.txt', 'r') as system_prompt_file:
         system_prompt = system_prompt_file.read()
@@ -47,12 +38,6 @@ def fetch_llm_response(question, context):
         user_prompt = user_prompt_file.read()
 
     user_prompt = user_prompt.format(context=context, question=question)
-
-    params = {
-        'system_prompt': system_prompt,
-        'user_prompt': user_prompt
-    }
-
-    response = _dispatch_request(url, params, _build_headers())
-
+    params = {'system_prompt': system_prompt, 'user_prompt': user_prompt}
+    response = _dispatch_request(url, 'post', params, _build_headers())
     return response['result']['content']

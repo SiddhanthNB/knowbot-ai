@@ -8,5 +8,9 @@ dependencies = [
     "python-dotenv==1.1.0",
     "requests==2.32.3",
     "streamlit==1.44.0",
-    "qdrant-client==1.13.3",
+    "qdrant-client==1.15.1",
+    "langchain-community>=0.3.27",
+    "wikipedia>=1.4.0",
+    "langchain>=0.3.27",
+    "invoke>=2.2.0",
 ]
