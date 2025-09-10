@@ -7,9 +7,14 @@ def _perform_RAG(user_query):
     try:
         embeddings = fetch_embeddings(user_query)
         semantic_search_result = perform_semantic_search(constants.QDRANT_COLLECTION_NAME, embeddings)
+
+        if not semantic_search_result:
+            return "I'm sorry, but I could not find any relevant information in my knowledge base to answer your question."
+
         context = [ point.payload.get('text') for point in semantic_search_result ]
         context = "\n".join(context)
         answer = fetch_llm_response(user_query, context)
+
         return answer
     except Exception as e:
         st.toast("Failed to generate response. Try after sometime!")

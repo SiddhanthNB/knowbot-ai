@@ -3,6 +3,7 @@ from invoke.collection import Collection
 import utils.constants as constants
 from config.qdrant import get_qdrant_client
 from qdrant_client.http import models
+from utils.helpers.injector import start_data_injection
 
 @task
 def create_qdrant_collection(ctx):
@@ -19,6 +20,11 @@ def delete_qdrant_collection(ctx):
         collection_name=constants.QDRANT_COLLECTION_NAME
     )
 
+@task
+def populate_qdrant_collection(ctx):
+    start_data_injection()
+
 one_time_collection = Collection('one-time-tasks')
 one_time_collection.add_task(create_qdrant_collection, 'create-qdrant-collection')
 one_time_collection.add_task(delete_qdrant_collection, 'delete-qdrant-collection')
+one_time_collection.add_task(populate_qdrant_collection, 'populate-qdrant-collection')
