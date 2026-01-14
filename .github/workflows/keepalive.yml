@@ -2,7 +2,7 @@ name: keepalive-puppeteer
 
 on:
   schedule:
-    - cron: "0 */6 * * *"
+    - cron: "0 */8 * * *"
   workflow_dispatch:
 
 jobs:
@@ -22,4 +22,4 @@ jobs:
           STREAMLIT_URL: ${{ secrets.STREAMLIT_URL }}
           GITHUB_STEP_SUMMARY: ${{ env.GITHUB_STEP_SUMMARY }}
         run: |
-          npx -y puppeteer@22 node .github/scripts/keepalive.js
+          npx -y puppeteer@latest node .github/scripts/keepalive.js

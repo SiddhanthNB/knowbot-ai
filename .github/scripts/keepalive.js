@@ -48,6 +48,8 @@ const fail = async (reason, err) => {
     await fail('STREAMLIT_URL env var is required');
   }
 
+  console.log(`Starting keepalive for ${STREAMLIT_URL}`);
+
   let browser;
   const startedAt = Date.now();
 
