@@ -22,4 +22,5 @@ jobs:
           STREAMLIT_URL: ${{ secrets.STREAMLIT_URL }}
           GITHUB_STEP_SUMMARY: ${{ env.GITHUB_STEP_SUMMARY }}
         run: |
-          npx -y puppeteer@latest node .github/scripts/keepalive.js
+          npm install puppeteer
+          node .github/scripts/keepalive.js
