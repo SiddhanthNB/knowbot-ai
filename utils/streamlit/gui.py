@@ -7,6 +7,10 @@ from utils.helpers.corenest import fetch_embeddings, fetch_llm_response
 
 NO_INFO_MESSAGE = "I'm sorry, but I could not find any relevant information in my knowledge base to answer your question."
 
+
+def _format_response_for_markdown(text):
+    return text.replace("$", r"\$")
+
 def _perform_RAG(user_query):
     try:
         embeddings = fetch_embeddings(user_query)
@@ -53,15 +57,25 @@ def render_main_ui():
             with st.spinner("Processing your query..."):
                 response = _perform_RAG(user_input)
             st.session_state.user_query = user_input
-            st.markdown(f"**Response:**\n\n{response}")
+            st.markdown(f"**Response:**\n\n{_format_response_for_markdown(response)}")
 
             if response and response != NO_INFO_MESSAGE:
                 content_for_chatgpt = f"My original query was: {user_input}\n\nI received this response:\n{response}\n\nCan you please elaborate or provide more details?"
                 encoded_content = quote(content_for_chatgpt)
                 chatgpt_url = f"https://chat.openai.com/?q={encoded_content}"
+                claude_url = f"https://claude.ai/new?q={encoded_content}"
 
                 st.markdown(
-                    f'<a href="{chatgpt_url}" target="_blank"><button style="background-color:#4CAF50;color:white;padding:8px 16px;border:none;border-radius:4px;cursor:pointer;">Continue on ChatGPT</button></a>',
+                    f"""
+                    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+                        <a href="{chatgpt_url}" target="_blank">
+                            <button style="background-color:#4CAF50;color:white;padding:8px 16px;border:none;border-radius:4px;cursor:pointer;">Continue on ChatGPT</button>
+                        </a>
+                        <a href="{claude_url}">
+                            <button style="background-color:#D97706;color:white;padding:8px 16px;border:none;border-radius:4px;cursor:pointer;">Continue in Claude</button>
+                        </a>
+                    </div>
+                    """,
                     unsafe_allow_html=True
                 )
         else:
