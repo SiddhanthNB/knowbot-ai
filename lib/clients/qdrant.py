@@ -1,6 +1,12 @@
-from config.qdrant import get_qdrant_client
+from qdrant_client import QdrantClient
 
-_client = get_qdrant_client()
+from app.config import constants
+
+_client = QdrantClient(url=constants.QDRANT_URL, api_key=constants.QDRANT_ACCESS_KEY)
+
+
+def get_qdrant_client():
+    return _client
 
 def _check_collection_exists(collection_name):
     if not _client.collection_exists(collection_name=collection_name):

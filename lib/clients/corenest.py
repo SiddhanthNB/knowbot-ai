@@ -1,5 +1,5 @@
 import requests
-import utils.constants as constants
+from app.config import constants
 
 CORENEST_EMBEDDINGS_PROVIDER = "google"
 
@@ -66,21 +66,7 @@ def fetch_embeddings(text):
     return _extract_embedding(response)
 
 
-def fetch_llm_response(question, context):
+def fetch_llm_response(request_params):
     url = f"{constants.CORENEST_API_URL}/completions"
-
-    with open("utils/prompts/system_prompt.txt", "r") as system_prompt_file:
-        system_prompt = system_prompt_file.read()
-
-    with open("utils/prompts/user_prompt.txt", "r") as user_prompt_file:
-        user_prompt = user_prompt_file.read()
-
-    user_prompt = user_prompt.format(context=context, question=question)
-    params = {
-        "messages": [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ]
-    }
-    response = _dispatch_request(url, "post", params, _build_headers())
+    response = _dispatch_request(url, "post", request_params, _build_headers())
     return _extract_completion_text(response)

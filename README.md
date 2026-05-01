@@ -10,10 +10,11 @@ Live app: https://knowbot-ai.streamlit.app/
 - Streamlit UI with “continue on ChatGPT” handoff
 
 ## Architecture
-- **UI**: Streamlit (`utils/streamlit/gui.py`) handles input, RAG call, and response rendering.
-- **Retrieval**: Qdrant (`utils/helpers/qdrant.py`) stores 3072-dim Gemini embeddings; searches with score thresholds.
-- **Model Gateway**: CoreNest (`utils/helpers/corenest.py`) wraps embeddings and completions endpoints with bearer auth.
-- **Ingestion**: Wikipedia topic crawler/ingestor (`utils/helpers/injector.py`) splits text, filters low-value chunks, embeds with Gemini, and upserts to Qdrant.
+- **UI**: Streamlit (`app/ui/streamlit_app.py`) handles input and response rendering.
+- **Runtime RAG**: (`lib/pipeline/rag.py`) orchestrates query embedding, retrieval, context assembly, and completion generation.
+- **Integrations**: (`lib/clients/`) wraps CoreNest and Qdrant access.
+- **Pipeline Data**: (`lib/pipeline/prompts/`, `lib/pipeline/topics.yaml`) stores prompt templates and the ingestion topic list.
+- **Ingestion**: (`lib/pipeline/ingestion.py`) splits text, filters low-value chunks, embeds with Gemini, and upserts to Qdrant.
 - **Tasks**: Invoke commands in `tasks.py` for one-time collection lifecycle and data seeding.
 
 ## Prerequisites
@@ -47,7 +48,7 @@ uv sync                     # installs deps from pyproject/uv.lock into .venv
 ```bash
 streamlit run main.py
 ```
-Logs are emitted to stdout (see `config/logger.py`).
+Logs are emitted to stdout (see `app/config/logging.py`).
 
 ## Data seeding (optional)
 Requires Qdrant reachable and `.env` filled.
@@ -60,10 +61,14 @@ inv one-time-tasks.populate-qdrant-collection
 
 ## Project structure
 - `main.py` — Streamlit entrypoint
-- `utils/streamlit/gui.py` — UI + RAG flow
-- `utils/helpers/*` — CoreNest client, Qdrant client, ingestion utilities
-- `config/*` — logging and Qdrant client wiring
-- `utils/prompts/*` — system/user prompt templates
+- `app/ui/streamlit_app.py` — Streamlit UI
+- `app/config/*` — constants and logging
+- `lib/pipeline/rag.py` — runtime RAG orchestration
+- `lib/pipeline/prompts/*` — prompt templates used to build completion request params
+- `lib/pipeline/topics.yaml` — flat topic list used for Wikipedia ingestion
+- `lib/clients/*` — CoreNest and Qdrant integrations
+- `lib/pipeline/ingestion.py` — Wikipedia ingestion pipeline
+- `lib/utils/*` — shared utility helpers
 - `tasks.py` — Invoke task collection
 
 ## Notes

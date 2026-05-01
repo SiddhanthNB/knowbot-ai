@@ -1,9 +1,9 @@
 from invoke.tasks import task
 from invoke.collection import Collection
-import utils.constants as constants
-from config.qdrant import get_qdrant_client
+from app.config import constants
 from qdrant_client.http import models
-from utils.helpers.injector import start_data_injection
+from lib.clients.qdrant import get_qdrant_client
+from lib.pipeline.ingestion import start_data_injection
 
 @task
 def create_qdrant_collection(ctx):

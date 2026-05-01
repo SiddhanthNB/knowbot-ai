@@ -1,36 +1,8 @@
 import streamlit as st
 from urllib.parse import quote
-import utils.constants as constants
-from config.logger import logger
-from utils.helpers.qdrant import perform_semantic_search
-from utils.helpers.corenest import fetch_embeddings, fetch_llm_response
-
-NO_INFO_MESSAGE = "I'm sorry, but I could not find any relevant information in my knowledge base to answer your question."
-
-
-def _format_response_for_markdown(text):
-    return text.replace("$", r"\$")
-
-def _perform_RAG(user_query):
-    try:
-        embeddings = fetch_embeddings(user_query)
-        semantic_search_result = perform_semantic_search(constants.QDRANT_COLLECTION_NAME, embeddings)
-
-        if not semantic_search_result:
-            return NO_INFO_MESSAGE
-
-        context = [ point.payload.get('content', '') for point in semantic_search_result ]
-        context = "\n".join(context)
-
-        if not context.strip():
-            return NO_INFO_MESSAGE
-
-        answer = fetch_llm_response(user_query, context)
-
-        return answer
-    except Exception as e:
-        logger.error(f"Error in _perform_RAG: {e}")
-        st.toast("Failed to generate response. Try after sometime!")
+from app.config.logging import logger
+from lib.pipeline.rag import NO_INFO_MESSAGE, perform_rag
+from lib.utils.markdown import format_response_for_markdown
 
 def init_session_state():
     if 'user_query' not in st.session_state:
@@ -55,9 +27,14 @@ def render_main_ui():
     if st.button("Submit", disabled=is_disabled):
         if user_input.strip():
             with st.spinner("Processing your query..."):
-                response = _perform_RAG(user_input)
+                try:
+                    response = perform_rag(user_input)
+                except Exception as exc:
+                    logger.error(f"Error in perform_rag: {exc}")
+                    st.toast("Failed to generate response. Try after sometime!")
+                    response = None
             st.session_state.user_query = user_input
-            st.markdown(f"**Response:**\n\n{_format_response_for_markdown(response)}")
+            st.markdown(f"**Response:**\n\n{format_response_for_markdown(response)}")
 
             if response and response != NO_INFO_MESSAGE:
                 content_for_chatgpt = f"My original query was: {user_input}\n\nI received this response:\n{response}\n\nCan you please elaborate or provide more details?"

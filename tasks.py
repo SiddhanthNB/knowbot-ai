@@ -1,5 +1,5 @@
 from invoke.collection import Collection
-from utils.tasks.one_time_tasks import one_time_collection
+from lib.tasks.one_time import one_time_collection
 
 ns = Collection()
 ns.add_collection(one_time_collection)

@@ -24,7 +24,7 @@ The `scripts/ingest_data.py` script is responsible for loading the data, process
 - [ ] **Implement the Qdrant upsert logic:**
     -   Create a new Qdrant collection with a configurable name.
     -   Upsert the embedded chunks into the new collection. Each point in Qdrant should contain the embedding vector and the original text chunk as payload.
-- [ ] **Handle Qdrant client:** Use the existing `get_qdrant_client` from `config/qdrant.py`.
+- [ ] **Handle Qdrant client:** Use the existing `get_qdrant_client` from `lib/clients/qdrant.py`.
 
 ## Configuration
 
@@ -32,7 +32,7 @@ The `scripts/ingest_data.py` script is responsible for loading the data, process
     -   `GEMINI_API_BASE_URL`
     -   `GEMINI_EMBEDDING_MODEL`
     -   `GEMINI_API_KEY`
-- [ ] **Update `utils/constants.py`:** Load the new Gemini configuration variables from the environment.
+- [ ] **Update `app/config/constants.py`:** Load the Gemini configuration variables from the environment.
 
 ## Runtime (RAG)
 

@@ -1,20 +1,31 @@
+from pathlib import Path
 import re, time, wikipedia, uuid
-from config.logger import logger
+
+import yaml
+from app.config.logging import logger
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import PointStruct
-import utils.constants as constants
-from config.qdrant import get_qdrant_client
-from utils.helpers.qdrant import _check_collection_exists
+from app.config import constants
 from langdetect import detect
 from langdetect.lang_detect_exception import LangDetectException
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from tenacity import retry, stop_after_attempt, wait_random_exponential, retry_if_exception_type
 from langchain_google_genai._common import GoogleGenerativeAIError
-from utils.helpers.topics_list import WIKIPEDIA_TOPICS
+from lib.clients.qdrant import _check_collection_exists, get_qdrant_client
+
+TOPICS_FILE = Path(__file__).resolve().parent / "topics.yaml"
+
+
+def _load_topics():
+    data = yaml.safe_load(TOPICS_FILE.read_text(encoding="utf-8")) or {}
+    topics = data.get("topics", [])
+    if not isinstance(topics, list):
+        raise ValueError("'topics' must be a list in topics.yaml")
+    return topics
 
 def _load_wikipedia_articles():
-    topics_to_process = list(WIKIPEDIA_TOPICS)
+    topics_to_process = list(_load_topics())
     all_articles = []
     loaded_topics = set()
 
